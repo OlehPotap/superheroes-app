@@ -50,7 +50,7 @@ const Form = () => {
     const imageToDelete = images.find((img) => img === el);
     images.splice(images.indexOf(imageToDelete), 1);
   };
-  console.log(formData);
+  // console.log(formData);
 
   return (
     <ThemeProvider theme={theme}>
