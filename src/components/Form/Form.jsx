@@ -29,7 +29,7 @@ const Form = () => {
         .get("superpowers")
         .split(",")
         .map((el) => el.trim()),
-      Images: data.getAll("Images"),
+      Images: images,
     });
   };
 
@@ -50,7 +50,7 @@ const Form = () => {
     const imageToDelete = images.find((img) => img === el);
     images.splice(images.indexOf(imageToDelete), 1);
   };
-  //   console.log(images);
+  console.log(formData);
 
   return (
     <ThemeProvider theme={theme}>
