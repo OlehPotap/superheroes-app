@@ -14,16 +14,19 @@ const style = {
   p: 4,
 };
 
-const ModalUnit = ({ isOpen, closeModal }) => {
+const ModalUnit = ({ modalOptions, closeModal }) => {
   return (
     <Modal
-      open={isOpen}
+      open={modalOptions.isOpen}
       onClose={closeModal}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
       <Box sx={style}>
-        <Form />
+        <Form
+          isEditing={modalOptions.isEditing}
+          superheroEditInfo={modalOptions.card}
+        />
       </Box>
     </Modal>
   );

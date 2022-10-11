@@ -1,7 +1,4 @@
-import {
-  useState,
-  // useEffect
-} from "react";
+import { useState, useEffect } from "react";
 
 // import { useDispatch, useSelector } from "react-redux";
 
@@ -13,32 +10,42 @@ import HeroUnit from "./components/Hero/Hero.jsx";
 import SuperheroesGrid from "./components/SuperheroesGrid/SuperheroesGrid.jsx";
 import Footer from "./components/Footer/Footer.jsx";
 import ModalUnit from "./components/ModalUnit/ModalUnit.jsx";
-// import { selectIsLoading, selectError } from "./redux/selectors";
-// import { getAllHeroes } from "./redux/operations";
+
+import { useDispatch } from "react-redux";
+import { getAllHeroes } from "./redux/operations";
 
 const theme = createTheme();
 
 export default function App() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [modalOptions, setModalOptions] = useState({
+    card: {},
+    isOpen: false,
+    isEditing: false,
+  });
 
-  // const dispatch = useDispatch();
-  // const isLoading = useSelector(selectIsLoading);
-  // const error = useSelector(selectError);
+  const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   dispatch(getAllHeroes());
-  // }, [dispatch]);
+  useEffect(() => {
+    if (!modalOptions.isOpen) {
+      dispatch(getAllHeroes());
+    }
+  }, [dispatch, modalOptions]);
 
-  const handleOpenModal = () => setIsOpen(true);
-  const handleCloseModal = () => setIsOpen(false);
+  const handleOpenModal = () =>
+    setModalOptions({ ...modalOptions, isOpen: true, isEditing: false });
+  const handleOpenModalandEditHero = (card) => {
+    setModalOptions({ card: card, isOpen: true, isEditing: true });
+  };
+  const handleCloseModal = () =>
+    setModalOptions({ ...modalOptions, isOpen: false, isEditing: false });
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Header />
       <main>
         <HeroUnit openModal={handleOpenModal} />
-        <SuperheroesGrid />
-        <ModalUnit isOpen={isOpen} closeModal={handleCloseModal} />
+        <SuperheroesGrid openModal={handleOpenModalandEditHero} />
+        <ModalUnit modalOptions={modalOptions} closeModal={handleCloseModal} />
       </main>
       <Footer />
     </ThemeProvider>

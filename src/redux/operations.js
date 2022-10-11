@@ -31,7 +31,8 @@ export const updateHero = createAsyncThunk(
   "heroes/update",
   async (newHero, thunkAPI) => {
     try {
-      const { data } = await axios.patch(`/:${newHero._id}`, newHero);
+      console.log(newHero);
+      const { data } = await axios.patch(`/${newHero.id}`, newHero);
       return data;
     } catch (e) {}
   }
@@ -41,7 +42,7 @@ export const removeHero = createAsyncThunk(
   "heroes/remove",
   async (id, thunkAPI) => {
     try {
-      const data = await axios.delete(`/:${id}`);
+      const data = await axios.delete(`/${id}`);
       return data;
     } catch (e) {
       return thunkAPI.rejectWithValue(e.message);

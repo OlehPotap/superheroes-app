@@ -1,13 +1,27 @@
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-// import CameraIcon from '@mui/icons-material/PhotoCamera';
+import { useState } from "react";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Grid from "@mui/material/Grid";
+import { useDispatch } from "react-redux";
+import { removeHero } from "../../../redux/operations";
+import defaultImg from "../../../additional/Screenshot_8.png";
+import SuperheroModalUnit from "./SuperheroModalUnit/SuperheroModalUnit";
 
-const SuperheroCard = () => {
+const SuperheroCard = ({ card, openModal }) => {
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const dispatch = useDispatch();
+  const handleDeleteCard = () => {
+    dispatch(removeHero(card._id));
+  };
+  const handleEdit = () => {
+    openModal(card);
+  };
   return (
     <Grid item xs={12} sm={6} md={6}>
       <Card
@@ -18,29 +32,33 @@ const SuperheroCard = () => {
         }}
       >
         <CardMedia
-          style={{ paddingTop: "0" }}
+          style={{ paddingTop: "0", height: "400px", objectFit: "cover" }}
           component="img"
-          // sx={{
-          //   // 16:9
-          //   pt: "56.25%",
-          // }}
-          image="https://source.unsplash.com/random"
+          sx={{
+            // 16:9
+            pt: "56.25%",
+          }}
+          image={card.images.length > 0 ? card.images[0] : defaultImg}
           alt="random"
         />
         <CardContent sx={{ flexGrow: 1 }}>
           <Typography gutterBottom variant="h5" component="h2">
-            Heading
-          </Typography>
-          <Typography>
-            This is a media card. You can use this section to describe the
-            content.
+            {card.nickname}
           </Typography>
         </CardContent>
         <CardActions>
-          <Button size="small">View</Button>
-          <Button size="small">Edit</Button>
+          <Button onClick={handleOpen} size="small">
+            View
+          </Button>
+          <Button onClick={handleEdit} size="small">
+            Edit
+          </Button>
+          <Button onClick={handleDeleteCard} size="small">
+            Delete
+          </Button>
         </CardActions>
       </Card>
+      <SuperheroModalUnit handleClose={handleClose} open={open} card={card} />
     </Grid>
   );
 };

@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getAllHeroes, addHero, updateHero, removeHero } from "./operations";
+import Notiflix from "notiflix";
 
 const handlePending = (state) => {
   state.isLoading = true;
@@ -28,6 +29,7 @@ const slice = createSlice({
 
     [addHero.pending]: handlePending,
     [addHero.fulfilled](state, action) {
+      Notiflix.Notify.success(`superhero ${action.payload.nickname} added`);
       state.isLoading = false;
       state.error = null;
       state.items.push(action.payload);
@@ -38,16 +40,22 @@ const slice = createSlice({
     [removeHero.fulfilled](state, action) {
       state.isLoading = false;
       state.error = null;
-      const index = state.items.findIndex((task) => task.id === action.payload);
+      const index = state.items.findIndex(
+        (hero) => hero._id === action.payload.data._id
+      );
       state.items.splice(index, 1);
     },
     [removeHero.rejected]: handleRejected,
     [updateHero.pending]: handlePending,
     [updateHero.fulfilled](state, action) {
+      // console.log(action.payload);
+      state.isLoading = false;
+      state.error = null;
+      Notiflix.Notify.success(`superhero ${action.payload.nickname} updated`);
       state.isLoading = false;
       state.error = null;
       const index = state.items.findIndex(
-        (task) => task.id === action.payload.id
+        (hero) => hero._id === action.payload._id
       );
       state.items.splice(index, 1, action.payload);
     },

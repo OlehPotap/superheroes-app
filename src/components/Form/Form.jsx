@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
@@ -11,26 +11,100 @@ import { v4 as uuidv4 } from "uuid";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import s from "./form.module.scss";
 
+import { useDispatch } from "react-redux";
+// import { selectIsLoading } from "../../redux/selectors";
+import { addHero, updateHero } from "../../redux/operations";
+
 const theme = createTheme();
 
-const Form = () => {
-  const [formData, setFormData] = useState({});
-  const [images, setImages] = useState([]);
+const Form = ({ isEditing, superheroEditInfo }) => {
+  const [values, setValues] = useState({
+    nickname: "",
+    real_name: "",
+    origin_description: "",
+    catch_phrase: "",
+    superpowers: "",
+    images: [],
+  });
+  useEffect(() => {
+    isEditing
+      ? setValues({
+          // _id: superheroEditInfo._id,
+          nickname: superheroEditInfo.nickname,
+          real_name: superheroEditInfo.real_name,
+          origin_description: superheroEditInfo.origin_description,
+          catch_phrase: superheroEditInfo.catch_phrase,
+          superpowers: superheroEditInfo.superpowers,
+          images: superheroEditInfo.images,
+        })
+      : setValues({
+          nickname: "",
+          real_name: "",
+          origin_description: "",
+          catch_phrase: "",
+          superpowers: "",
+          images: [],
+        }); // eslint-disable-next-line
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setValues({
+      ...values,
+      [name]: value,
+    });
+  };
+
+  const dispatch = useDispatch();
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    setFormData({
-      nickname: data.get("nickname"),
-      real_name: data.get("real_name"),
-      origin_description: data.get("origin_description"),
-      catch_phrase: data.get("catch_phrase"),
-      superpowers: data
-        .get("superpowers")
-        .split(",")
-        .map((el) => el.trim()),
-      Images: images,
-    });
+    isEditing
+      ? dispatch(
+          updateHero({
+            id: superheroEditInfo._id,
+            nickname: data.get("nickname"),
+            real_name: data.get("real_name")
+              ? data.get("real_name")
+              : "The hero's identity has yet to be revealed.",
+            origin_description: data.get("origin_description")
+              ? data.get("origin_description")
+              : "Nothing is known about the hero yet",
+            catch_phrase: data.get("catch_phrase")
+              ? data.get("catch_phrase")
+              : "Hero doesn't really talk (thinks he is some kind of hot shit or something)",
+            superpowers: data.get("superpowers")
+              ? data
+                  .get("superpowers")
+                  .split(",")
+                  .map((el) => el.trim())
+              : ["Hero's abilities are still unknown"],
+            images: values.images,
+          })
+        )
+      : dispatch(
+          addHero({
+            nickname: data.get("nickname"),
+            real_name: data.get("real_name")
+              ? data.get("real_name")
+              : "The hero's identity has yet to be revealed.",
+            origin_description: data.get("origin_description")
+              ? data.get("origin_description")
+              : "Nothing is known about the hero yet",
+            catch_phrase: data.get("catch_phrase")
+              ? data.get("catch_phrase")
+              : "Hero doesn't really talk (thinks he is some kind of hot shit or something)",
+            superpowers: data.get("superpowers")
+              ? data
+                  .get("superpowers")
+                  .split(",")
+                  .map((el) => el.trim())
+              : ["Hero's abilities are still unknown"],
+            images: values.images,
+          })
+        );
+    // setFormData();
   };
 
   const handleImagesChange = (event) => {
@@ -40,17 +114,18 @@ const Form = () => {
       let reader = new FileReader();
       reader.onloadend = () => {
         arr.push(reader.result);
-        setImages([...images, ...arr]);
+        setValues({ ...values, images: [...values["images"], ...arr] });
       };
       reader.readAsDataURL(file);
     });
   };
 
   const handleDeleteImg = (el) => {
-    const imageToDelete = images.find((img) => img === el);
-    images.splice(images.indexOf(imageToDelete), 1);
+    const imageToDelete = values["images"].find((img) => img === el);
+    const newImages = [...values["images"]];
+    newImages.splice(newImages.indexOf(imageToDelete), 1);
+    setValues({ ...values, images: [...newImages] });
   };
-  // console.log(formData);
 
   return (
     <ThemeProvider theme={theme}>
@@ -74,6 +149,8 @@ const Form = () => {
             sx={{ mt: 1 }}
           >
             <TextField
+              value={values.nickname}
+              onChange={handleChange}
               margin="normal"
               required
               fullWidth
@@ -85,6 +162,8 @@ const Form = () => {
               autoFocus
             />
             <TextField
+              value={values.real_name}
+              onChange={handleChange}
               margin="normal"
               //   required
               fullWidth
@@ -95,6 +174,8 @@ const Form = () => {
               //   autoComplete="current-password"
             />
             <TextField
+              value={values.origin_description}
+              onChange={handleChange}
               margin="normal"
               //   required
               fullWidth
@@ -105,6 +186,8 @@ const Form = () => {
               //   autoComplete="current-password"
             />
             <TextField
+              value={values.superpowers}
+              onChange={handleChange}
               margin="normal"
               //   required
               fullWidth
@@ -115,6 +198,8 @@ const Form = () => {
               //   autoComplete="current-password"
             />
             <TextField
+              value={values.catch_phrase}
+              onChange={handleChange}
               margin="normal"
               //   required
               fullWidth
@@ -127,7 +212,7 @@ const Form = () => {
             <label className={s.fileInputLabel}>
               <input
                 onChange={handleImagesChange}
-                id="nickname"
+                id="images"
                 multiple
                 style={{ display: "none" }}
                 type="file"
@@ -135,12 +220,13 @@ const Form = () => {
               />
               Hero images
             </label>
-            {images.length > 0 ? (
+            {values["images"].length > 0 ? (
               <Grid style={{ marginTop: "10px" }} container spacing={0}>
-                {images.map((el) => (
+                {values["images"].map((el) => (
                   <div className={s.imgWrapper} key={uuidv4()}>
                     <img className={s.imgUnit} alt="superhero" src={el} />
                     <button
+                      type="button"
                       onClick={() => handleDeleteImg(el)}
                       className={s.deleteImgBtn}
                     >
